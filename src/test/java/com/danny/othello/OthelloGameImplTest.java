@@ -14,10 +14,10 @@ import com.danny.othello.bean.Coordinate;
 import com.danny.othello.bean.Othello;
 import com.danny.othello.util.OthelloMoveConverter;
 import com.danny.othello.util.OthelloPrinter;
-import com.danny.othello.util.RCOthelloMoveConverter;
+import com.danny.othello.util.OthelloMoveConverterImpl;
 
 public class OthelloGameImplTest {
-	private OthelloMoveConverter othelloMoveConverter = new RCOthelloMoveConverter();
+	private OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
 
 	//start
 	@Test(expected=IllegalArgumentException.class)

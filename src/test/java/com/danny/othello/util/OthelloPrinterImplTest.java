@@ -10,7 +10,7 @@ import com.danny.othello.bean.Coordinate;
 import com.danny.othello.bean.Othello;
 import com.danny.othello.util.OthelloMoveConverter;
 import com.danny.othello.util.OthelloPrinterImpl;
-import com.danny.othello.util.RCOthelloMoveConverter;
+import com.danny.othello.util.OthelloMoveConverterImpl;
 
 import junit.framework.Assert;
 
@@ -20,7 +20,7 @@ public class OthelloPrinterImplTest {
 	private int rows = 9;
 	
 	private OthelloPrinterImpl othelloPrinter= new OthelloPrinterImpl();
-	private OthelloMoveConverter othelloMoveConverter = new RCOthelloMoveConverter();
+	private OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
 	
 	@Test
 	public void testPrintWithAllEmpty() {

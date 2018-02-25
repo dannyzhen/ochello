@@ -7,7 +7,7 @@ import com.danny.othello.bean.Othello;
 import com.danny.othello.util.OthelloMoveConverter;
 import com.danny.othello.util.OthelloPrinter;
 import com.danny.othello.util.OthelloPrinterImpl;
-import com.danny.othello.util.RCOthelloMoveConverter;
+import com.danny.othello.util.OthelloMoveConverterImpl;
 
 /**
  * Hello world!
@@ -21,7 +21,7 @@ public class OthelloApp {
 		
 		LOG.info("START OthelloApp");
 		OthelloPrinter othelloPrinter = new OthelloPrinterImpl();
-		OthelloMoveConverter othelloMoveConverter = new RCOthelloMoveConverter();
+		OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
 		
 		Othello othello = new Othello(8, 8, OthelloConstant.PLAYER_X, OthelloConstant.PLAYER_O,
 				OthelloConstant.PLAYER_X);
