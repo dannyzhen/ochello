@@ -85,5 +85,16 @@ public class OthelloMoveConverterImplTest {
 	public void testConvertInvalid9a() {
 		converter.convert("9a");
 	}
+	
+	@Test(expected=OthelloException.class)
+	public void testConvertInvalid3ab4() {
+		converter.convert("3ab4");
+	}
+
+	
+	@Test(expected=OthelloException.class)
+	public void testConvertInvalid3aa() {
+		converter.convert("3aa");
+	}
 
 }
