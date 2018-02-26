@@ -25,7 +25,7 @@
     </logger>       
             
     <root>       
-        <level value ="info"/>          
+        <level value ="error"/>          
         <appender-ref ref="myFile"/>          
     </root>       
 </log4j:configuration>  
