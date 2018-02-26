@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.danny.othello.bean.Coordinate;
 import com.danny.othello.bean.Othello;
+import com.danny.othello.util.OthelloFactory;
 import com.danny.othello.util.OthelloMoveConverter;
 import com.danny.othello.util.OthelloPrinter;
 import com.danny.othello.util.OthelloUtil;
@@ -19,11 +20,11 @@ public class OthelloGameImpl implements OthelloGame{
 	
 	private OthelloPrinter othelloPrinter;
 	private OthelloMoveConverter othelloMoveConverter;
+	private OthelloFactory othelloFactory;
 	
-	public void start(Othello othello) {
-		if (othello == null) {
-			throw new IllegalArgumentException("Othello is null");
-		}
+	public void start() {
+		
+		Othello othello = othelloFactory.createOthello();
 
 		othelloPrinter.print(othello);
 		while (true) {
@@ -262,6 +263,10 @@ public class OthelloGameImpl implements OthelloGame{
 
 	public void setOthelloMoveConverter(OthelloMoveConverter othelloMoveConverter) {
 		this.othelloMoveConverter = othelloMoveConverter;
+	}
+
+	public void setOthelloFactory(OthelloFactory othelloFactory) {
+		this.othelloFactory = othelloFactory;
 	}
 
 }

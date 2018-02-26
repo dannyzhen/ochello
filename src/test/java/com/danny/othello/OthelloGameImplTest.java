@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.danny.othello.bean.Coordinate;
 import com.danny.othello.bean.Othello;
+import com.danny.othello.util.OthelloFactory;
 import com.danny.othello.util.OthelloMoveConverter;
 import com.danny.othello.util.OthelloPrinter;
 import com.danny.othello.util.OthelloMoveConverterImpl;
@@ -20,17 +21,16 @@ public class OthelloGameImplTest {
 	private OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
 
 	//start
-	@Test(expected=IllegalArgumentException.class)
-	public void testStartNullOthello() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
-		othelloGame.start(null);
-	}
 	
 	@Test
 	public void testStart() {
 		OthelloGameImpl othelloGame = new DummpOthelloGameImpl();
 		OthelloPrinter othelloPrinter = EasyMock.createNiceMock(OthelloPrinter.class);
 		Othello othello = EasyMock.createNiceMock(Othello.class);
+		
+		OthelloFactory othelloFactory = EasyMock.createNiceMock(OthelloFactory.class);
+		
+		EasyMock.expect(othelloFactory.createOthello()).andReturn(othello);
 		
 		//First try, canMove=true
 		othello.switchPlayer();
@@ -56,12 +56,13 @@ public class OthelloGameImplTest {
 		othelloPrinter.printResult(othello);
 		EasyMock.expectLastCall();
 		
-		EasyMock.replay(othelloPrinter, othello);
+		EasyMock.replay(othelloPrinter, othello, othelloFactory);
 		
 		othelloGame.setOthelloPrinter(othelloPrinter);
-		othelloGame.start(othello);
+		othelloGame.setOthelloFactory(othelloFactory);
+		othelloGame.start();
 		
-		EasyMock.verify(othelloPrinter, othello);
+		EasyMock.verify(othelloPrinter, othello, othelloFactory);
 	}
 	
 	static class DummpOthelloGameImpl extends OthelloGameImpl {
