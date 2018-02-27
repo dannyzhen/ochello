@@ -1,10 +1,12 @@
-package com.danny.othello.util;
+package com.danny.othello.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.danny.othello.OthelloConstant;
 import com.danny.othello.bean.Othello;
+import com.danny.othello.intf.OthelloFactory;
+import com.danny.othello.intf.OthelloMoveConverter;
 
 public class OthelloFactoryImpl implements OthelloFactory{
 	private static Log LOG =LogFactory.getLog(OthelloFactoryImpl.class);

@@ -1,4 +1,4 @@
-package com.danny.othello.util;
+package com.danny.othello.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -8,29 +8,25 @@ import org.junit.Test;
 import com.danny.othello.OthelloConstant;
 import com.danny.othello.bean.Coordinate;
 import com.danny.othello.bean.Othello;
-import com.danny.othello.util.OthelloMoveConverter;
-import com.danny.othello.util.OthelloPrinterImpl;
-import com.danny.othello.util.OthelloMoveConverterImpl;
+import com.danny.othello.impl.OthelloMoveConverterImpl;
+import com.danny.othello.impl.OthelloFormatterImpl;
+import com.danny.othello.intf.OthelloMoveConverter;
 
 import junit.framework.Assert;
 
-public class OthelloPrinterImplTest {
+public class OthelloFormatterImplTest {
 	private final static String SPACE = " ";
 	private int columns = 8;
 	private int rows = 9;
 	
-	private OthelloPrinterImpl othelloPrinter= new OthelloPrinterImpl();
+	private OthelloFormatterImpl othelloFormatter= new OthelloFormatterImpl();
 	private OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
 	
 	@Test
-	public void testPrintWithAllEmpty() {
-		ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(outContent));
-
+	public void testFormatWithAllEmpty() {
 		Othello othello = new Othello(columns, rows, OthelloConstant.PLAYER_O, OthelloConstant.PLAYER_X, OthelloConstant.PLAYER_O);
-		othelloPrinter.print(othello);
+		String actual = othelloFormatter.format(othello);
 		
-		String actual = outContent.toString();
 		String expected = generateExpectedResult(columns, rows, OthelloConstant.EMPTY_DISPLAY_VALUE);
 		Assert.assertEquals(expected, actual);
 		
@@ -38,8 +34,6 @@ public class OthelloPrinterImplTest {
 	
 	@Test
 	public void testPrintWithAllPieces() {
-		ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(outContent));
 
 		Othello othello = new Othello(columns, rows, OthelloConstant.PLAYER_O, OthelloConstant.PLAYER_X, OthelloConstant.PLAYER_O);
 		for (int row = 0; row < rows; row ++) {
@@ -47,9 +41,8 @@ public class OthelloPrinterImplTest {
 				othello.setPiece(new Coordinate(row, column));
 			}
 		}
-		othelloPrinter.print(othello);
+		String actual =  othelloFormatter.format(othello);
 		
-		String actual = outContent.toString();
 		String expected = generateExpectedResult(columns, rows, OthelloConstant.PLAYER_O);
 		Assert.assertEquals(expected, actual);
 		
@@ -69,14 +62,11 @@ public class OthelloPrinterImplTest {
 		for (int i = 0; i < columns; i ++) {
 			othelloString.append((char)(OthelloConstant.CHAR_BASE + i));
 		}
-		othelloString.append(System.lineSeparator());
 		return othelloString.toString();
 	}
 	
 	@Test
-	public void testPrintResultPlayer1Win() {
-		ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(outContent));
+	public void testFormatResultPlayer1Win() {
 		
 		Othello othello = new Othello(8, 8, OthelloConstant.PLAYER_X, OthelloConstant.PLAYER_O,
 				OthelloConstant.PLAYER_X);
@@ -87,15 +77,14 @@ public class OthelloPrinterImplTest {
 		othello.switchPlayer();
 		othello.setPiece(othelloMoveConverter.convert("4d"));
 		
-		othelloPrinter.printResult(othello);
-		String actual = outContent.toString();
-		String expected = "Player 'X' wins ( 4 vs 1 )" + System.lineSeparator();
+		String actual = othelloFormatter.formatResult(othello);
+		String expected = "Player 'X' wins ( 4 vs 1 )";
 		
 		Assert.assertEquals(expected, actual);
 	}
 	
 	@Test
-	public void testPrintResultDraw() {
+	public void testFormatResultDraw() {
 		ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(outContent));
 		
@@ -107,17 +96,14 @@ public class OthelloPrinterImplTest {
 		othello.setPiece(othelloMoveConverter.convert("4d"));
 		othello.setPiece(othelloMoveConverter.convert("6d"));
 		
-		othelloPrinter.printResult(othello);
-		String actual = outContent.toString();
-		String expected = "Draw ( 2 vs 2 )" + System.lineSeparator();
+		String actual = othelloFormatter.formatResult(othello);
+		String expected = "Draw ( 2 vs 2 )";
 		
 		Assert.assertEquals(expected, actual);
 	}
 	
 	@Test
 	public void testPrintResultPlayer2Win() {
-		ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(outContent));
 		
 		Othello othello = new Othello(8, 8, OthelloConstant.PLAYER_X, OthelloConstant.PLAYER_O,
 				OthelloConstant.PLAYER_X);
@@ -128,9 +114,8 @@ public class OthelloPrinterImplTest {
 		othello.setPiece(othelloMoveConverter.convert("6d"));
 		othello.setPiece(othelloMoveConverter.convert("7d"));
 		
-		othelloPrinter.printResult(othello);
-		String actual = outContent.toString();
-		String expected = "Player 'O' wins ( 3 vs 2 )" + System.lineSeparator();
+		String actual = othelloFormatter.formatResult(othello);
+		String expected = "Player 'O' wins ( 3 vs 2 )";
 		
 		Assert.assertEquals(expected, actual);
 	}

@@ -1,10 +1,12 @@
-package com.danny.othello.util;
+package com.danny.othello.impl;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.danny.othello.OthelloConstant;
 import com.danny.othello.bean.Othello;
+import com.danny.othello.impl.OthelloFactoryImpl;
+import com.danny.othello.impl.OthelloMoveConverterImpl;
 
 public class OthelloFactoryImplTest {
 	

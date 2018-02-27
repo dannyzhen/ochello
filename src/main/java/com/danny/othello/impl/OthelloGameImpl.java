@@ -1,32 +1,35 @@
-package com.danny.othello;
+package com.danny.othello.impl;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.danny.othello.OthelloException;
 import com.danny.othello.bean.Coordinate;
 import com.danny.othello.bean.Othello;
-import com.danny.othello.util.OthelloFactory;
-import com.danny.othello.util.OthelloMoveConverter;
-import com.danny.othello.util.OthelloPrinter;
+import com.danny.othello.intf.OthelloFactory;
+import com.danny.othello.intf.OthelloFormatter;
+import com.danny.othello.intf.OthelloGame;
+import com.danny.othello.intf.OthelloMoveConverter;
+import com.danny.othello.intf.UI;
 import com.danny.othello.util.OthelloUtil;
 
 public class OthelloGameImpl implements OthelloGame{
 	
 	private static Log LOG =LogFactory.getLog(OthelloGameImpl.class);
 	
-	private OthelloPrinter othelloPrinter;
+	private OthelloFormatter othelloFormatter;
 	private OthelloMoveConverter othelloMoveConverter;
 	private OthelloFactory othelloFactory;
+	private UI ui;
 	
 	public void start() {
 		
 		Othello othello = othelloFactory.createOthello();
 
-		othelloPrinter.print(othello);
+		ui.write(othelloFormatter.format(othello));
 		while (true) {
 			if (canMove(othello)) {
 
@@ -40,7 +43,7 @@ public class OthelloGameImpl implements OthelloGame{
 					LOG.info(String.format("End move from player %s ", othello.getCurrentPlayer()));
 				}
 				othello.switchPlayer();
-				othelloPrinter.print(othello);
+				ui.write(othelloFormatter.format(othello));
 			}
 			else {
 				if (LOG.isInfoEnabled()) {
@@ -66,7 +69,7 @@ public class OthelloGameImpl implements OthelloGame{
 					}
 					
 					othello.switchPlayer();
-					othelloPrinter.print(othello);
+					ui.write(othelloFormatter.format(othello));
 				}
 				else {
 					
@@ -74,8 +77,8 @@ public class OthelloGameImpl implements OthelloGame{
 						LOG.info("No further moves available");
 					}
 					
-					System.out.println("No further moves available");
-					othelloPrinter.printResult(othello);
+					ui.write("No further moves available");
+					ui.write(othelloFormatter.formatResult(othello));
 					break;
 				}
 			}
@@ -84,7 +87,7 @@ public class OthelloGameImpl implements OthelloGame{
 	
 	protected void move(Othello othello) {
 		while (true) {
-			String moveString = readDataFromConsole(String.format("Player '%s' move: ", othello.getCurrentPlayer()));
+			String moveString = ui.read(String.format("Player '%s' move: ", othello.getCurrentPlayer()));
 			Coordinate coordinate = null;
 
 			if (LOG.isInfoEnabled()) {
@@ -98,7 +101,7 @@ public class OthelloGameImpl implements OthelloGame{
 				if (LOG.isInfoEnabled()) {
 					LOG.info(String.format("Invalid move format %s", moveString));
 				}
-				System.out.println("Invalid move. Please try again.");
+				ui.write("Invalid move. Please try again.");
 				continue;
 			}
 			
@@ -124,7 +127,7 @@ public class OthelloGameImpl implements OthelloGame{
 					if (LOG.isInfoEnabled()) {
 						LOG.info(String.format("Invalid move %s as no captured pieces found", moveString));
 					}
-					System.out.println("Invalid move. Please try again.");
+					ui.write("Invalid move. Please try again.");
 				}
 			}
 			else {
@@ -133,7 +136,7 @@ public class OthelloGameImpl implements OthelloGame{
 				if (LOG.isInfoEnabled()) {
 					LOG.info(String.format("Invalid move %s", moveString));
 				}
-				System.out.println("Invalid move. Please try again.");
+				ui.write("Invalid move. Please try again.");
 			}
 		}
 	}
@@ -248,17 +251,9 @@ public class OthelloGameImpl implements OthelloGame{
 		
 		return coordinates;
 	}
-	
-	protected String readDataFromConsole(String prompt) {
-        Console console = System.console();
-        if (console == null) {
-            throw new IllegalStateException("Console is not available!");
-        }
-        return console.readLine(prompt);
-    }
 
-	public void setOthelloPrinter(OthelloPrinter othelloPrinter) {
-		this.othelloPrinter = othelloPrinter;
+	public void setOthelloFormatter(OthelloFormatter othelloFormatter) {
+		this.othelloFormatter = othelloFormatter;
 	}
 
 	public void setOthelloMoveConverter(OthelloMoveConverter othelloMoveConverter) {
@@ -267,6 +262,10 @@ public class OthelloGameImpl implements OthelloGame{
 
 	public void setOthelloFactory(OthelloFactory othelloFactory) {
 		this.othelloFactory = othelloFactory;
+	}
+
+	public void setUi(UI ui) {
+		this.ui = ui;
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.danny.othello.util;
+package com.danny.othello.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import com.danny.othello.OthelloException;
 import com.danny.othello.bean.Coordinate;
+import com.danny.othello.impl.OthelloMoveConverterImpl;
 
 public class OthelloMoveConverterImplTest {
 	

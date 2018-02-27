@@ -1,21 +1,22 @@
-package com.danny.othello;
+package com.danny.othello.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.danny.othello.OthelloConstant;
+import com.danny.othello.OthelloException;
 import com.danny.othello.bean.Coordinate;
 import com.danny.othello.bean.Othello;
-import com.danny.othello.util.OthelloFactory;
-import com.danny.othello.util.OthelloMoveConverter;
-import com.danny.othello.util.OthelloPrinter;
-import com.danny.othello.util.OthelloMoveConverterImpl;
+import com.danny.othello.intf.OthelloFactory;
+import com.danny.othello.intf.OthelloFormatter;
+import com.danny.othello.intf.OthelloMoveConverter;
+import com.danny.othello.intf.UI;
 
 public class OthelloGameImplTest {
 	private OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
@@ -23,9 +24,43 @@ public class OthelloGameImplTest {
 	//start
 	
 	@Test
+	public void testStartFull() {
+		String steps = "4c 3e 5f 4b 2e 6f 4a 1e 4f 3g 4g 5g 5h 6e 4h 6g 7e 6d 2g 1g 7h 6h 2f 5c 5b 3a 3b 3c 2d 2c 2b 2a 1b 3d 7c 8e 8f 8h 8d 7d 1a 7b 7a 8b 7g 5a 6a 3h 1d 1c 1f 3f 1h 2h 6c 8a 8c 8g 7f 6b";
+		
+		OthelloFormatter othelloFormatter = new OthelloFormatterImpl();
+		OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
+		OthelloFactoryImpl othelloFactory = new OthelloFactoryImpl();  
+		othelloFactory.setOthelloMoveConverter(othelloMoveConverter);
+		UI ui = EasyMock.createNiceMock(UI.class);
+		String[] stepArray = steps.split(" ");
+		for (String step : stepArray) {
+			EasyMock.expect(ui.read(EasyMock.isA(String.class))).andReturn(step);
+		}
+		
+		Capture<String> writeCapture = new Capture<String>();  
+        ui.write(EasyMock.capture(writeCapture));  
+          
+        EasyMock.expectLastCall().times(stepArray.length * 2);  
+		
+		EasyMock.replay(ui);
+
+		OthelloGameImpl othelloGame = new OthelloGameImpl();
+		othelloGame.setOthelloMoveConverter(othelloMoveConverter);
+		othelloGame.setOthelloFormatter(othelloFormatter);
+		othelloGame.setOthelloFactory(othelloFactory);
+		othelloGame.setUi(ui);
+
+		othelloGame.start();
+		List<String> messages = writeCapture.getValues();  
+		
+		Assert.assertTrue(messages.contains("Player 'O' wins ( 38 vs 26 )"));
+	}
+	
+	@Test
 	public void testStart() {
 		OthelloGameImpl othelloGame = new DummpOthelloGameImpl();
-		OthelloPrinter othelloPrinter = EasyMock.createNiceMock(OthelloPrinter.class);
+		UI ui = EasyMock.createNiceMock(UI.class);
+		OthelloFormatter othelloFormatter = EasyMock.createNiceMock(OthelloFormatter.class);
 		Othello othello = EasyMock.createNiceMock(Othello.class);
 		
 		OthelloFactory othelloFactory = EasyMock.createNiceMock(OthelloFactory.class);
@@ -35,7 +70,8 @@ public class OthelloGameImplTest {
 		//First try, canMove=true
 		othello.switchPlayer();
 		EasyMock.expectLastCall();
-		othelloPrinter.print(othello);
+		EasyMock.expect(othelloFormatter.format(othello)).andReturn("FORMAT1");
+		ui.write("FORMAT1");
 		EasyMock.expectLastCall();
 		
 		//Second try, canMove = false
@@ -45,7 +81,8 @@ public class OthelloGameImplTest {
 		//Third try, canMove=true
 		othello.switchPlayer();
 		EasyMock.expectLastCall();
-		othelloPrinter.print(othello);
+		EasyMock.expect(othelloFormatter.format(othello)).andReturn("FORMAT2");
+		ui.write("FORMAT2");
 		EasyMock.expectLastCall();
 		
 		//Fourth try, canMove = false
@@ -53,16 +90,20 @@ public class OthelloGameImplTest {
 		EasyMock.expectLastCall();
 		
 		//Fifth try, canMove = false
-		othelloPrinter.printResult(othello);
+		EasyMock.expect(othelloFormatter.formatResult(othello)).andReturn("RESULT");
+		ui.write("No further moves available");
+		EasyMock.expectLastCall();
+		ui.write("RESULT");
 		EasyMock.expectLastCall();
 		
-		EasyMock.replay(othelloPrinter, othello, othelloFactory);
+		EasyMock.replay(othelloFormatter, othello, othelloFactory, ui);
 		
-		othelloGame.setOthelloPrinter(othelloPrinter);
+		othelloGame.setUi(ui);
+		othelloGame.setOthelloFormatter(othelloFormatter);
 		othelloGame.setOthelloFactory(othelloFactory);
 		othelloGame.start();
 		
-		EasyMock.verify(othelloPrinter, othello, othelloFactory);
+		EasyMock.verify(othelloFormatter, othello, othelloFactory, ui);
 	}
 	
 	static class DummpOthelloGameImpl extends OthelloGameImpl {
@@ -87,44 +128,49 @@ public class OthelloGameImplTest {
 	//move
 	@Test
 	public void testMoveInvalidMoveFormat() {
-		ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(outContent));
 		
 		OthelloGameImpl othelloGame = new DummpOthelloGameImpl2();
 		Othello othello = createOthello(new String[] {"3g"}, new String[] {"3e", "3f"});
 		
+		UI ui = EasyMock.createNiceMock(UI.class);
+		
 		OthelloMoveConverter othelloMoveConverter = EasyMock.createNiceMock(OthelloMoveConverter.class);
 		
 		//First try, invalid move format
+		EasyMock.expect(ui.read(EasyMock.isA(String.class))).andReturn("1");
 		EasyMock.expect(othelloMoveConverter.convert("1")).andThrow(new OthelloException(""));
+		ui.write("Invalid move. Please try again.");
+		EasyMock.expectLastCall();
 		
 		//Second try, invalid Coordinate
+		EasyMock.expect(ui.read(EasyMock.isA(String.class))).andReturn("2");
 		EasyMock.expect(othelloMoveConverter.convert("2")).andReturn(new Coordinate(8, 8));
-		
+		ui.write("Invalid move. Please try again.");
+		EasyMock.expectLastCall();
 
 		//Third try, occupied piece
+		EasyMock.expect(ui.read(EasyMock.isA(String.class))).andReturn("3");
 		EasyMock.expect(othelloMoveConverter.convert("3")).andReturn(new Coordinate(2, 6));
-		
+		ui.write("Invalid move. Please try again.");
+		EasyMock.expectLastCall();
 
 		//Fourth try, No captured pieces found
+		EasyMock.expect(ui.read(EasyMock.isA(String.class))).andReturn("4");
 		EasyMock.expect(othelloMoveConverter.convert("4")).andReturn(new Coordinate(1, 1));
+		ui.write("Invalid move. Please try again.");
+		EasyMock.expectLastCall();
 		
 		//Fifth try, Found captured pieces
+		EasyMock.expect(ui.read(EasyMock.isA(String.class))).andReturn("5");
 		EasyMock.expect(othelloMoveConverter.convert("5")).andReturn(new Coordinate(1, 1));
 		
-		EasyMock.replay(othelloMoveConverter);
+		EasyMock.replay(othelloMoveConverter, ui);
 		
 		othelloGame.setOthelloMoveConverter(othelloMoveConverter);
+		othelloGame.setUi(ui);
 		othelloGame.move(othello);
 		
 		EasyMock.verify(othelloMoveConverter);
-		
-		String actual = outContent.toString();
-		String expected = "";
-		for (int i = 0; i < 4; i ++) {
-			expected += "Invalid move. Please try again." + System.lineSeparator();
-		}
-		Assert.assertEquals(expected, actual);
 
 	}
 	
@@ -133,11 +179,6 @@ public class OthelloGameImplTest {
 		int readDataFromConsoleCalls = 0;
 		int getCapturedPiecesCalls = 0;
 		
-		@Override
-		public String readDataFromConsole(String prompt) {
-			readDataFromConsoleCalls ++;
-			return String.valueOf(readDataFromConsoleCalls);
-		}
 		
 		@Override
 		protected List<Coordinate> getCapturedPieces(Othello othello, Coordinate coordinate) {

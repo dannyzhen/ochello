@@ -1,14 +1,16 @@
-package com.danny.othello.util;
+package com.danny.othello.impl;
 
 import com.danny.othello.OthelloConstant;
 import com.danny.othello.bean.Othello;
+import com.danny.othello.intf.OthelloFormatter;
 
-public class OthelloPrinterImpl implements OthelloPrinter{
+public class OthelloFormatterImpl implements OthelloFormatter{
 	private final static short CHAR_BASE = 97; 
 	private final static String SPACE = " ";
 	private char emptyDisplayValue = OthelloConstant.EMPTY_DISPLAY_VALUE;
 
-	public void print(Othello othello) {
+	public String format(Othello othello) {
+		String formattedString = null;
 		if (othello != null) {
 			char[][] pieces = othello.getPieces();
 			StringBuffer othelloString = new StringBuffer();
@@ -25,8 +27,10 @@ public class OthelloPrinterImpl implements OthelloPrinter{
 			for (int i = 0; i < ySize; i ++) {
 				othelloString.append((char)(CHAR_BASE + i));
 			}
-			System.out.println(othelloString.toString());
+			formattedString =  othelloString.toString();
 		}
+		
+		return formattedString;
 		
 	}
 
@@ -34,7 +38,10 @@ public class OthelloPrinterImpl implements OthelloPrinter{
 		this.emptyDisplayValue = emptyDisplayValue;
 	}
 
-	public void printResult(Othello othello) {
+	public String formatResult(Othello othello) {
+		
+		String resultString = null;
+		
 		char player1 = othello.getCurrentPlayer();
 		othello.switchPlayer();
 		char player2 = othello.getCurrentPlayer();
@@ -54,14 +61,16 @@ public class OthelloPrinterImpl implements OthelloPrinter{
 		}
 		
 		if (player1Pieces > player2Pieces) {
-			System.out.println(String.format("Player '%s' wins ( %s vs %s )", player1, player1Pieces, player2Pieces));
+			resultString = String.format("Player '%s' wins ( %s vs %s )", player1, player1Pieces, player2Pieces);
 		}
 		else if (player1Pieces == player2Pieces) {
-			System.out.println(String.format("Draw ( %s vs %s )", player1Pieces, player2Pieces));
+			resultString = String.format("Draw ( %s vs %s )", player1Pieces, player2Pieces);
 		}
 		else {
-			System.out.println(String.format("Player '%s' wins ( %s vs %s )", player2, player2Pieces, player1Pieces));
+			resultString = String.format("Player '%s' wins ( %s vs %s )", player2, player2Pieces, player1Pieces);
 		}
+		
+		return resultString;
 		
 		
 	}

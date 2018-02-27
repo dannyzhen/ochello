@@ -1,4 +1,4 @@
-package com.danny.othello.util;
+package com.danny.othello.intf;
 
 import com.danny.othello.bean.Coordinate;
 

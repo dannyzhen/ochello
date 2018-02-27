@@ -1,4 +1,4 @@
-package com.danny.othello.util;
+package com.danny.othello.impl;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import com.danny.othello.OthelloConstant;
 import com.danny.othello.OthelloException;
 import com.danny.othello.bean.Coordinate;
+import com.danny.othello.intf.OthelloMoveConverter;
 
 /**
  * Convert input move string into Move
