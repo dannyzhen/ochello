@@ -1,11 +1,8 @@
 package com.danny.othello.impl;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.danny.othello.OthelloConstant;
 import com.danny.othello.OthelloException;
 import com.danny.othello.bean.Coordinate;
+import com.danny.othello.intf.OthelloFactory;
 import com.danny.othello.intf.OthelloMoveConverter;
 
 /**
@@ -13,32 +10,28 @@ import com.danny.othello.intf.OthelloMoveConverter;
  *
  */
 public class OthelloMoveConverterImpl implements OthelloMoveConverter {
-
-	private Pattern pattern = Pattern.compile(OthelloConstant.MOVE_REGEX);
-
+	
+	private OthelloFactory othelloFactory;
 	/**
 	 * 
 	 */
 	public Coordinate convert(String moveString) {
-		Coordinate move = null;
-		if (moveString == null || !pattern.matcher(moveString.trim()).matches()) {
+		Coordinate coordinate = null;
+		if (moveString == null || moveString.trim().length() != 2) {
 			throw new OthelloException(String.format("Invalid move %s", moveString));
 		}
 
-		Matcher matcher = pattern.matcher(moveString.trim());
-		if (matcher.matches()) {
-			String firstChar = matcher.group(1) == null ? matcher.group(4) : matcher.group(1);
-			String secondChar = matcher.group(2) == null ? matcher.group(3) : matcher.group(2);
-
-			move = new Coordinate(Integer.parseInt(firstChar) - 1,
-					Integer.valueOf(secondChar.charAt(0)) - OthelloConstant.CHAR_BASE);
-
-		} else {
+		coordinate = othelloFactory.getCoordinate(moveString.trim().toLowerCase());
+		if (coordinate == null) {
 			throw new OthelloException(String.format("Invalid move %s", moveString));
 		}
 
-		return move;
+		return coordinate;
 
+	}
+	
+	public void setOthelloFactory(OthelloFactory othelloFactory) {
+		this.othelloFactory = othelloFactory;
 	}
 
 }

@@ -1,11 +1,11 @@
 package com.danny.othello.impl;
 
-import java.io.Console;
+import java.util.Scanner;
 
-import com.danny.othello.OthelloException;
 import com.danny.othello.intf.UI;
 
 public class UiImpl implements UI{
+	private Scanner scanner = new Scanner(System.in);
 
 	public void write(String message) {
 		System.out.println(message);
@@ -13,11 +13,10 @@ public class UiImpl implements UI{
 	}
 
 	public String read(String prompt) {
-		Console console = System.console();
-        if (console == null) {
-            throw new OthelloException("Console is not available!");
-        }
-        return console.readLine(prompt);
+		System.out.print(prompt);
+		System.out.flush();
+        String input = scanner.nextLine();
+        return input;
 	}
 
 }

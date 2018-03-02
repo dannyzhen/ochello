@@ -7,6 +7,7 @@ import java.util.List;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.danny.othello.OthelloConstant;
@@ -19,7 +20,14 @@ import com.danny.othello.intf.OthelloMoveConverter;
 import com.danny.othello.intf.UI;
 
 public class OthelloGameImplTest {
-	private OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
+	private OthelloMoveConverterImpl othelloMoveConverter = new OthelloMoveConverterImpl();
+	private OthelloGameImpl othelloGame = new OthelloGameImpl();
+	@Before 
+	public void before() {
+		OthelloFactoryImpl othelloFactory= new OthelloFactoryImpl();
+		othelloMoveConverter.setOthelloFactory(othelloFactory);
+		othelloGame.setOthelloFactory(othelloFactory);
+	}
 
 	//start
 	
@@ -28,16 +36,16 @@ public class OthelloGameImplTest {
 		String steps = "4c 3e 5f 4b 2e 6f 4a 1e 4f 3g 4g 5g 5h 6e 4h 6g 7e 6d 2g 1g 7h 6h 2f 5c 5b 3a 3b 3c 2d 2c 2b 2a 1b 3d 7c 8e 8f 8h 8d 7d 1a 7b 7a 8b 7g 5a 6a 3h 1d 1c 1f 3f 1h 2h 6c 8a 8c 8g 7f 6b";
 		
 		OthelloFormatter othelloFormatter = new OthelloFormatterImpl();
-		OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
+		OthelloMoveConverterImpl othelloMoveConverter = new OthelloMoveConverterImpl();
 		OthelloFactoryImpl othelloFactory = new OthelloFactoryImpl();  
-		othelloFactory.setOthelloMoveConverter(othelloMoveConverter);
+		othelloMoveConverter.setOthelloFactory(othelloFactory);
 		UI ui = EasyMock.createNiceMock(UI.class);
 		String[] stepArray = steps.split(" ");
 		for (String step : stepArray) {
 			EasyMock.expect(ui.read(EasyMock.isA(String.class))).andReturn(step);
 		}
 		
-		Capture<String> writeCapture = new Capture<String>();  
+		Capture<String> writeCapture = Capture.newInstance();
         ui.write(EasyMock.capture(writeCapture));  
           
         EasyMock.expectLastCall().times(stepArray.length * 2);  
@@ -53,6 +61,39 @@ public class OthelloGameImplTest {
 		othelloGame.start();
 		List<String> messages = writeCapture.getValues();  
 		
+		Assert.assertTrue(messages.contains("Player 'O' wins ( 38 vs 26 )"));
+	}
+	
+	@Test
+	public void testStartFullWithUndo() {
+		String steps = "4c 3e 5f 4b 2e 6f u u 2e 6f 4a 1e 4f 3g 4g 5g 5h 6e 4h 6g 7e 6d 2g 1g 7h 6h 2f 5c 5b 3a 3b 3c 2d 2c 2b 2a 1b 3d 7c u u u u 2a 1b 3d 7c 8e 8f 8h 8d 7d 1a 7b 7a 8b 7g 5a 6a 3h 1d 1c 1f 3f 1h 2h 6c 8a 8c 8g 7f 6b";
+
+		OthelloFormatter othelloFormatter = new OthelloFormatterImpl();
+		OthelloMoveConverterImpl othelloMoveConverter = new OthelloMoveConverterImpl();
+		OthelloFactoryImpl othelloFactory = new OthelloFactoryImpl();
+		othelloMoveConverter.setOthelloFactory(othelloFactory);
+		UI ui = EasyMock.createNiceMock(UI.class);
+		String[] stepArray = steps.split(" ");
+		for (String step : stepArray) {
+			EasyMock.expect(ui.read(EasyMock.isA(String.class))).andReturn(step);
+		}
+
+		Capture<String> writeCapture = Capture.newInstance();
+		ui.write(EasyMock.capture(writeCapture));
+
+		EasyMock.expectLastCall().times(stepArray.length * 2 + 20);
+
+		EasyMock.replay(ui);
+
+		OthelloGameImpl othelloGame = new OthelloGameImpl();
+		othelloGame.setOthelloMoveConverter(othelloMoveConverter);
+		othelloGame.setOthelloFormatter(othelloFormatter);
+		othelloGame.setOthelloFactory(othelloFactory);
+		othelloGame.setUi(ui);
+
+		othelloGame.start();
+		List<String> messages = writeCapture.getValues();
+
 		Assert.assertTrue(messages.contains("Player 'O' wins ( 38 vs 26 )"));
 	}
 	
@@ -187,7 +228,7 @@ public class OthelloGameImplTest {
 				return new ArrayList<Coordinate>();
 			}
 			else {
-				return Arrays.asList(new Coordinate(2, 2));
+				return new ArrayList<Coordinate>(Arrays.asList(new Coordinate(2, 2)));
 			}
 			
 		}
@@ -197,7 +238,6 @@ public class OthelloGameImplTest {
 	//canMove
 	@Test
 	public void testCanMoveEast() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"3g"}, new String[] {"3e", "3f"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -207,7 +247,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testCanMoveWest() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"3d"}, new String[] {"3e", "3f"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -217,7 +256,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testCanMoveNorth() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"2d"}, new String[] {"3d", "4d"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -227,7 +265,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testCanMoveSouth() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"5d"}, new String[] {"3d", "4d"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -237,7 +274,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testCanMoveNortheast() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"1h"}, new String[] {"3f", "2g"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -247,7 +283,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testCanMoveSouthwest() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"4e"}, new String[] {"3f", "2g"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -257,7 +292,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testCanMoveNorthwest() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"1a"}, new String[] {"2b", "3c"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -267,7 +301,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testCanMoveSoutheast() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"4d"}, new String[] {"2b", "3c"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -277,7 +310,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testCanMoveAllDirs() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"1a", "2h", "8b", "8h"}, new String[] {"2b", "3c", "4d", "4f", "3g", "6d", "7c", "6f", "7g"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -287,7 +319,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testCanNotMove() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"1d"}, new String[] {"2b", "3c", "4d", "4f", "3g", "6d", "7c", "6f", "7g"});
 		
 		boolean result = othelloGame.canMove(othello);
@@ -298,7 +329,6 @@ public class OthelloGameImplTest {
 	//getCapturedPieces 
 	@Test
 	public void testGetCapturedPiecesEast() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"3g"}, new String[] {"3e", "3f"});
 		
 		List<Coordinate> result = othelloGame.getCapturedPieces(othello, othelloMoveConverter.convert("3d"));
@@ -310,7 +340,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testGetCapturedPiecesWest() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"3d"}, new String[] {"3e", "3f"});
 		
 		List<Coordinate> result = othelloGame.getCapturedPieces(othello, othelloMoveConverter.convert("3g"));
@@ -322,7 +351,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testGetCapturedPiecesNorth() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"2d"}, new String[] {"3d", "4d"});
 		
 		List<Coordinate> result = othelloGame.getCapturedPieces(othello, othelloMoveConverter.convert("5d"));
@@ -334,7 +362,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testGetCapturedPiecesSouth() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"5d"}, new String[] {"3d", "4d"});
 		
 		List<Coordinate> result = othelloGame.getCapturedPieces(othello, othelloMoveConverter.convert("2d"));
@@ -346,7 +373,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testGetCapturedPiecesNortheast() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"1h"}, new String[] {"3f", "2g"});
 		
 		List<Coordinate> result = othelloGame.getCapturedPieces(othello, othelloMoveConverter.convert("4e"));
@@ -358,7 +384,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testGetCapturedPiecesSouthwest() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"4e"}, new String[] {"3f", "2g"});
 		
 		List<Coordinate> result = othelloGame.getCapturedPieces(othello, othelloMoveConverter.convert("1h"));
@@ -370,7 +395,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testGetCapturedPiecesNorthwest() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"1a"}, new String[] {"2b", "3c"});
 		
 		List<Coordinate> result = othelloGame.getCapturedPieces(othello, othelloMoveConverter.convert("4d"));
@@ -382,7 +406,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testGetCapturedPiecesSoutheast() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"4d"}, new String[] {"2b", "3c"});
 		
 		List<Coordinate> result = othelloGame.getCapturedPieces(othello, othelloMoveConverter.convert("1a"));
@@ -394,7 +417,6 @@ public class OthelloGameImplTest {
 	
 	@Test
 	public void testGetCapturedPiecesAllDirs() {
-		OthelloGameImpl othelloGame = new OthelloGameImpl();
 		Othello othello = createOthello(new String[] {"1a", "2h", "8b", "8h"}, new String[] {"2b", "3c", "4d", "4f", "3g", "6d", "7c", "6f", "7g"});
 		
 		List<Coordinate> result = othelloGame.getCapturedPieces(othello, othelloMoveConverter.convert("5e"));

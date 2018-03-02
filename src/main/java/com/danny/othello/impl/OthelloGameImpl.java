@@ -93,52 +93,81 @@ public class OthelloGameImpl implements OthelloGame{
 			if (LOG.isInfoEnabled()) {
 				LOG.info(String.format("Received move %s from player %s", moveString, othello.getCurrentPlayer()));
 			}
-			try {
-				coordinate = othelloMoveConverter.convert(moveString);
-			}
-			catch (OthelloException e) {
-				//Invalid move format
-				if (LOG.isInfoEnabled()) {
-					LOG.info(String.format("Invalid move format %s", moveString));
-				}
-				ui.write("Invalid move. Please try again.");
-				continue;
-			}
 			
-			//Coordinate has valid index and the corresponding piece is empty
-			if (OthelloUtil.isValidCoordinate(othello.getColumns(), othello.getRows(), coordinate)
-					&& othello.getPieces()[coordinate.getRow()][coordinate.getColumn()] == 0) {
-				
-				
-				//Found captured pieces means it's valid move, perform the move and break WHILE
-				List<Coordinate> capturedPieces = getCapturedPieces(othello, coordinate);
-				if (capturedPieces.size() > 0) {
-					othello.setPiece(coordinate);
-					for (Coordinate capturedPiece : capturedPieces) {
-						if (LOG.isInfoEnabled()) {
-							LOG.info(String.format("Captured piece on row %s column %s", capturedPiece.getRow(), capturedPiece.getColumn()));
-						}
-						othello.setPiece(capturedPiece);
-					}
+			if (OthelloUtil.isUndo(moveString)) {
+				if (undo(othello)) {
 					break;
 				}
 				else {
-					//No captured pieces found, invalid move
-					if (LOG.isInfoEnabled()) {
-						LOG.info(String.format("Invalid move %s as no captured pieces found", moveString));
-					}
 					ui.write("Invalid move. Please try again.");
 				}
 			}
 			else {
-				//Invalid row or column or the piece is occupied
-
-				if (LOG.isInfoEnabled()) {
-					LOG.info(String.format("Invalid move %s", moveString));
+				try {
+					coordinate = othelloMoveConverter.convert(moveString);
 				}
-				ui.write("Invalid move. Please try again.");
+				catch (OthelloException e) {
+					//Invalid move format
+					if (LOG.isInfoEnabled()) {
+						LOG.info(String.format("Invalid move format %s", moveString));
+					}
+					ui.write("Invalid move. Please try again.");
+					continue;
+				}
+				
+				//Coordinate has valid index and the corresponding piece is empty
+				if (OthelloUtil.isValidCoordinate(othello.getColumns(), othello.getRows(), coordinate)
+						&& othello.getPieces()[coordinate.getRow()][coordinate.getColumn()] == 0) {
+					
+					
+					//Found captured pieces means it's valid move, perform the move and break WHILE
+					List<Coordinate> capturedPieces = getCapturedPieces(othello, coordinate);
+					if (capturedPieces.size() > 0) {
+						othello.setPiece(coordinate);
+						for (Coordinate capturedPiece : capturedPieces) {
+							if (LOG.isInfoEnabled()) {
+								LOG.info(String.format("Captured piece on row %s column %s", capturedPiece.getRow(), capturedPiece.getColumn()));
+							}
+							othello.setPiece(capturedPiece);
+						}
+						capturedPieces.add(coordinate);
+						othello.addMoveCaptureds(capturedPieces);
+						break;
+					}
+					else {
+						//No captured pieces found, invalid move
+						if (LOG.isInfoEnabled()) {
+							LOG.info(String.format("Invalid move %s as no captured pieces found", moveString));
+						}
+						ui.write("Invalid move. Please try again.");
+					}
+				}
+				else {
+					//Invalid row or column or the piece is occupied
+	
+					if (LOG.isInfoEnabled()) {
+						LOG.info(String.format("Invalid move %s", moveString));
+					}
+					ui.write("Invalid move. Please try again.");
+				}
 			}
 		}
+	}
+	
+	protected boolean undo(Othello othello) {
+		boolean undone = false;
+		List<Coordinate> lastMoveCaptureds = othello.removeLastMoveCaptureds();
+		if (lastMoveCaptureds != null && lastMoveCaptureds.size() > 0) {
+
+			othello.resetPiece(lastMoveCaptureds.remove(lastMoveCaptureds.size() - 1));
+			for (Coordinate lastMoveCaptured : lastMoveCaptureds) {
+				othello.setPiece(lastMoveCaptured);
+			}
+			undone = true;
+			othello.resetCurrentPlayerAfterUndo();
+		}
+		
+		return undone;
 	}
 	
 	/**
@@ -171,7 +200,7 @@ public class OthelloGameImpl implements OthelloGame{
 		for (int row = 0; row < othello.getRows() && (!canMove); row ++) {
 			for (int column = 0; column < othello.getColumns() && (!canMove); column ++) {
 				if (pieces[row][column] == 0) {
-					Coordinate coordinate = new Coordinate(row, column);
+					Coordinate coordinate = othelloFactory.getCoordinate(row, column);
 					canMove = canMove(othello, coordinate, 1, 0) //east
 							|| canMove(othello, coordinate, -1, 0) //west
 							|| canMove(othello, coordinate, 0, 1) //north
@@ -241,7 +270,7 @@ public class OthelloGameImpl implements OthelloGame{
 				break;
 			}
 			
-			coordinates.add(new Coordinate(rowIndex, columnIndex));
+			coordinates.add(othelloFactory.getCoordinate(rowIndex, columnIndex));
 		}
 		
 		if (!foundCapturedPieces) {

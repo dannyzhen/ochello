@@ -8,9 +8,6 @@ import org.junit.Test;
 import com.danny.othello.OthelloConstant;
 import com.danny.othello.bean.Coordinate;
 import com.danny.othello.bean.Othello;
-import com.danny.othello.impl.OthelloMoveConverterImpl;
-import com.danny.othello.impl.OthelloFormatterImpl;
-import com.danny.othello.intf.OthelloMoveConverter;
 
 import junit.framework.Assert;
 
@@ -20,7 +17,6 @@ public class OthelloFormatterImplTest {
 	private int rows = 9;
 	
 	private OthelloFormatterImpl othelloFormatter= new OthelloFormatterImpl();
-	private OthelloMoveConverter othelloMoveConverter = new OthelloMoveConverterImpl();
 	
 	@Test
 	public void testFormatWithAllEmpty() {
@@ -70,12 +66,12 @@ public class OthelloFormatterImplTest {
 		
 		Othello othello = new Othello(8, 8, OthelloConstant.PLAYER_X, OthelloConstant.PLAYER_O,
 				OthelloConstant.PLAYER_X);
-		othello.setPiece(othelloMoveConverter.convert("4e"));
-		othello.setPiece(othelloMoveConverter.convert("5d"));
-		othello.setPiece(othelloMoveConverter.convert("5e"));
-		othello.setPiece(othelloMoveConverter.convert("6e"));
+		othello.setPiece(new Coordinate(3, 4));
+		othello.setPiece(new Coordinate(4, 3));
+		othello.setPiece(new Coordinate(4, 4));
+		othello.setPiece(new Coordinate(5, 4));
 		othello.switchPlayer();
-		othello.setPiece(othelloMoveConverter.convert("4d"));
+		othello.setPiece(new Coordinate(3, 3));
 		
 		String actual = othelloFormatter.formatResult(othello);
 		String expected = "Player 'X' wins ( 4 vs 1 )";
@@ -90,11 +86,11 @@ public class OthelloFormatterImplTest {
 		
 		Othello othello = new Othello(8, 8, OthelloConstant.PLAYER_X, OthelloConstant.PLAYER_O,
 				OthelloConstant.PLAYER_X);
-		othello.setPiece(othelloMoveConverter.convert("4e"));
-		othello.setPiece(othelloMoveConverter.convert("5d"));
+		othello.setPiece(new Coordinate(3, 4));
+		othello.setPiece(new Coordinate(4, 3));
 		othello.switchPlayer();
-		othello.setPiece(othelloMoveConverter.convert("4d"));
-		othello.setPiece(othelloMoveConverter.convert("6d"));
+		othello.setPiece(new Coordinate(3, 3));
+		othello.setPiece(new Coordinate(5, 3));
 		
 		String actual = othelloFormatter.formatResult(othello);
 		String expected = "Draw ( 2 vs 2 )";
@@ -107,12 +103,12 @@ public class OthelloFormatterImplTest {
 		
 		Othello othello = new Othello(8, 8, OthelloConstant.PLAYER_X, OthelloConstant.PLAYER_O,
 				OthelloConstant.PLAYER_X);
-		othello.setPiece(othelloMoveConverter.convert("4e"));
-		othello.setPiece(othelloMoveConverter.convert("5d"));
+		othello.setPiece(new Coordinate(3, 4));
+		othello.setPiece(new Coordinate(4, 3));
 		othello.switchPlayer();
-		othello.setPiece(othelloMoveConverter.convert("4d"));
-		othello.setPiece(othelloMoveConverter.convert("6d"));
-		othello.setPiece(othelloMoveConverter.convert("7d"));
+		othello.setPiece(new Coordinate(3, 3));
+		othello.setPiece(new Coordinate(5, 3));
+		othello.setPiece(new Coordinate(6, 3));
 		
 		String actual = othelloFormatter.formatResult(othello);
 		String expected = "Player 'O' wins ( 3 vs 2 )";

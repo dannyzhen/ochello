@@ -1,5 +1,6 @@
 package com.danny.othello.util;
 
+import com.danny.othello.OthelloConstant;
 import com.danny.othello.bean.Coordinate;
 
 public class OthelloUtil {
@@ -22,6 +23,20 @@ public class OthelloUtil {
 		}
 		
 		return valid;
+	}
+	
+
+	/**
+	 * Check if move string is UNDO move
+	 * @param move
+	 * @return
+	 */
+	public static boolean isUndo(String move) {
+		boolean undo = false;
+		if (move != null) {
+			undo = OthelloConstant.UNDO_MOVE.equalsIgnoreCase(move.trim());
+		}
+		return undo;
 	}
 
 }

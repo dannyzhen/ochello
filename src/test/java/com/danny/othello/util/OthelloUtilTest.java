@@ -49,5 +49,37 @@ public class OthelloUtilTest {
 		boolean expected = false;
 		Assert.assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testUndoNull() {
+		boolean actual = OthelloUtil.isUndo(null);
+		boolean expected = false;
+		Assert.assertEquals(expected, actual);
+		
+	}
+	
+	@Test
+	public void testUndoNotUndo() {
+		boolean actual = OthelloUtil.isUndo(" A ");
+		boolean expected = false;
+		Assert.assertEquals(expected, actual);
+		
+	}
+	
+	@Test
+	public void testUndoUndoWithCapitalU() {
+		boolean actual = OthelloUtil.isUndo(" U ");
+		boolean expected = true;
+		Assert.assertEquals(expected, actual);
+		
+	}
+	
+	@Test
+	public void testUndoUndoWithlowcaseU() {
+		boolean actual = OthelloUtil.isUndo(" u ");
+		boolean expected = true;
+		Assert.assertEquals(expected, actual);
+		
+	}
 
 }
